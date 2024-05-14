@@ -1,7 +1,11 @@
 package com.my.sorted_playlist.user.domain;
 
+import com.my.sorted_playlist.common.enums.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,11 +27,15 @@ public class User {
 	private String nickname;
 	private String profileImage;
 
+	@Enumerated(EnumType.STRING)
+	private Role role;
+
 	@Builder
-	public User(String email, String password, String nickname, String profileImage) {
+	public User(String email, String password, String nickname, String profileImage, Role role) {
 		this.email = email;
 		this.password = password;
 		this.nickname = nickname;
 		this.profileImage = profileImage;
+		this.role = role;
 	}
 }
