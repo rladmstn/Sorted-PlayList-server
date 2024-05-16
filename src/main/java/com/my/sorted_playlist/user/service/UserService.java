@@ -2,12 +2,17 @@ package com.my.sorted_playlist.user.service;
 
 import java.io.IOException;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.my.sorted_playlist.common.enums.Role;
-import com.my.sorted_playlist.user.dto.RegisterRequestDTO;
+import com.my.sorted_playlist.user.domain.User;
+import com.my.sorted_playlist.user.dto.RegisterRequest;
+import com.my.sorted_playlist.user.dto.LogInRequest;
+import com.my.sorted_playlist.user.dto.UserResponse;
+import com.my.sorted_playlist.user.exception.LogInException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
 import com.my.sorted_playlist.user.repository.UserRepository;
 
@@ -24,15 +29,15 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final ImageService imageService;
 
-	public void register(RegisterRequestDTO registerRequestDTO, MultipartFile profileImage) {
+	public void register(RegisterRequest registerRequest, MultipartFile profileImage) {
 		try {
-			validateDuplicatedEmail(registerRequestDTO.email());
+			validateDuplicatedEmail(registerRequest.email());
 			String imageUrl = imageService.saveImage(profileImage);
 
-			userRepository.save(registerRequestDTO.toEntity(
-				registerRequestDTO.email(),
-				passwordEncoder.encode(registerRequestDTO.password()),
-				registerRequestDTO.nickname(),
+			userRepository.save(registerRequest.toEntity(
+				registerRequest.email(),
+				passwordEncoder.encode(registerRequest.password()),
+				registerRequest.nickname(),
 				imageUrl,
 				Role.USER
 			));
@@ -45,6 +50,17 @@ public class UserService {
 	public void validateDuplicatedEmail(String email){
 		if(userRepository.existsByEmail(email))
 			throw new UserValidationException("이미 가입된 이메일 입니다.");
+	}
+
+	public UserResponse logIn(LogInRequest logInRequest) {
+		User user = userRepository.findByEmail(logInRequest.email())
+			.orElseThrow(() -> new LogInException(HttpStatus.UNAUTHORIZED.value(), "가입되지 않은 이메일 입니다."));
+
+		String encodedPassword = user.getPassword();
+		if (! passwordEncoder.matches(logInRequest.password(), encodedPassword))
+			throw new LogInException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다");
+
+		return new UserResponse(user.getId(),user.getEmail(),user.getNickname(),user.getProfileImage()); // 비밀번호를 제거한 user 객체 반환
 	}
 
 }
