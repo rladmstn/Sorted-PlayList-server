@@ -2,7 +2,6 @@ package com.my.sorted_playlist.user.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import java.io.IOException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.user.domain.User;
@@ -45,6 +45,7 @@ class UserServiceTest {
 	private final String nickname = "nickname";
 	private final String encoded = "encoded";
 	private final String imageUrl = "imageUrl";
+	private final String newImageUrl = "newImageUrl";
 
 	private RegisterRequest registerRequest;
 	private LogInRequest logInRequest;
@@ -57,7 +58,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("회원가입 성공")
-	void 회원가입_성공() throws IOException {
+	void 회원가입_성공(){
 		// given
 		MockMultipartFile profileImage = new MockMultipartFile("profileImage",new byte[]{1,2,3});
 
@@ -123,5 +124,23 @@ class UserServiceTest {
 			.isInstanceOf(LogInException.class)
 			.hasFieldOrPropertyWithValue("status",HttpStatus.UNAUTHORIZED.value())
 			.hasFieldOrPropertyWithValue("error","비밀번호가 틀렸습니다.");
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 성공")
+	void 회원정보수정_성공(){
+		// given
+		MockMultipartFile newImage = new MockMultipartFile("newImage",new byte[]{3,3,3});
+		when(imageService.saveImage(any(MultipartFile.class))).thenReturn(newImageUrl);
+
+		User user = User.builder().email(email).password(password).nickname(nickname).profileImage(imageUrl).role(Role.USER).build();
+		String newNickname = "newNickname";
+		// when
+		User edited = userService.editUserInfo(user, newNickname, newImage);
+		// then
+		verify(imageService,times(1)).saveImage(newImage);
+		verify(imageService,times(1)).deleteImage(imageUrl);
+		assertThat(edited.getProfileImage()).isEqualTo(newImageUrl);
+		assertThat(edited.getNickname()).isEqualTo(newNickname);
 	}
 }
