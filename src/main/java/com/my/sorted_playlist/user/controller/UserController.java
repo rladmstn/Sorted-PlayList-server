@@ -77,6 +77,12 @@ public class UserController {
 		return ResponseEntity.ok().body("OK");
 	}
 
+	@GetMapping
+	@Operation(summary = "회원 정보 조회", description = "회원의 이메일, 닉네임, 프로필 사진을 조회하는 API")
+	public ResponseEntity<Object> getUserInfo(@CurrentUser User user){
+		return ResponseEntity.ok().body(userService.getUserInfo(user));
+	}
+
 	@GetMapping("/test")
 	@Operation(summary = "session test API")
 	public ResponseEntity<Object> test(@CurrentUser User user){

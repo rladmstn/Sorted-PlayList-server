@@ -9,6 +9,7 @@ import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.user.domain.User;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.user.dto.LogInRequest;
+import com.my.sorted_playlist.user.dto.UserInfoResponse;
 import com.my.sorted_playlist.user.dto.UserResponse;
 import com.my.sorted_playlist.user.exception.LogInException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
@@ -69,6 +70,10 @@ public class UserService {
 		}
 		log.info("success to edit user information");
 		return user;
+	}
+
+	public UserInfoResponse getUserInfo(User user){
+		return new UserInfoResponse(user.getEmail(), user.getNickname(), user.getProfileImage());
 	}
 
 }
