@@ -58,7 +58,7 @@ public class UserService {
 
 		String encodedPassword = user.getPassword();
 		if (! passwordEncoder.matches(logInRequest.password(), encodedPassword))
-			throw new LogInException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다.");
+			throw new LogInException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다");
 
 		return new UserResponse(user.getId(),user.getEmail(),user.getNickname(),user.getProfileImage()); // 비밀번호를 제거한 user 객체 반환
 	}

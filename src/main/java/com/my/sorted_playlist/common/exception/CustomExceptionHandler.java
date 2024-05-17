@@ -25,4 +25,9 @@ public class CustomExceptionHandler {
 	protected ResponseEntity<Object> handler(LogInException e){
 		return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getStatus(), e.getError(), null));
 	}
+
+	@ExceptionHandler(UserAccessException.class)
+	protected ResponseEntity<Object> handler(UserAccessException e){
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), e.getError(), null));
+	}
 }

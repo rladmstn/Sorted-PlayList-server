@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.my.sorted_playlist.common.annotation.CurrentUser;
+import com.my.sorted_playlist.user.domain.User;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.common.exception.RequestException;
 import com.my.sorted_playlist.user.dto.LogInRequest;
@@ -69,12 +71,7 @@ public class UserController {
 
 	@GetMapping("/test")
 	@Operation(summary = "session test API")
-	public ResponseEntity<Object> test(HttpServletRequest request){
-		HttpSession session = request.getSession(false);
-		if(session == null)
-			return ResponseEntity.badRequest().body("로그인 되어있지 않습니다.");
-		UserResponse user = (UserResponse) session.getAttribute("loginUser");
-		log.info("session test API");
-		return ResponseEntity.ok().body(user.email());
+	public ResponseEntity<Object> test(@CurrentUser User user){
+		return ResponseEntity.ok().body(user.getEmail());
 	}
 }
