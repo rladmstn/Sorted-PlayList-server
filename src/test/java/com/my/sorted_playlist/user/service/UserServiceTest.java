@@ -22,6 +22,7 @@ import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.user.domain.User;
 import com.my.sorted_playlist.user.dto.LogInRequest;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
+import com.my.sorted_playlist.user.dto.UserInfoResponse;
 import com.my.sorted_playlist.user.dto.UserResponse;
 import com.my.sorted_playlist.user.exception.LogInException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
@@ -142,5 +143,19 @@ class UserServiceTest {
 		verify(imageService,times(1)).deleteImage(imageUrl);
 		assertThat(edited.getProfileImage()).isEqualTo(newImageUrl);
 		assertThat(edited.getNickname()).isEqualTo(newNickname);
+	}
+
+	@Test
+	@DisplayName("회원 정보 조회 성공")
+	void 회원정보조회_성공(){
+		// given
+		User user = User.builder().email(email).password(password).nickname(nickname).profileImage(imageUrl).role(Role.USER).build();
+		// when
+		UserInfoResponse userInfo = userService.getUserInfo(user);
+		// then
+		assertThat(userInfo.email()).isEqualTo(email);
+		assertThat(userInfo.nickname()).isEqualTo(nickname);
+		assertThat(userInfo.profileImage()).isEqualTo(imageUrl);
+
 	}
 }
