@@ -3,6 +3,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,6 +67,13 @@ public class UserController {
 		session.setAttribute("loginUser", user);
 		session.setMaxInactiveInterval(60 * 60 * 8); // Session 8시간 유지
 
+		return ResponseEntity.ok().body("OK");
+	}
+
+	@PatchMapping( consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
+	@Operation(summary = "회원 정보 수정", description = "회원의 닉네임, 프로필 사진을 수정하는 API")
+	public ResponseEntity<Object> editUserInfo(@CurrentUser User user, @RequestParam(required = false) String nickname, @RequestPart(required = false) MultipartFile profileImage){
+		userService.editUserInfo(user, nickname, profileImage);
 		return ResponseEntity.ok().body("OK");
 	}
 

@@ -1,6 +1,8 @@
 package com.my.sorted_playlist.user.service;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,7 @@ public class ImageService {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
-	public String saveImage(MultipartFile multipartFile) throws IOException {
+	public String saveImage(MultipartFile multipartFile){
 		if(multipartFile == null)
 			return null;
 		String originalImageName = multipartFile.getOriginalFilename();
@@ -32,7 +34,18 @@ public class ImageService {
 		metadata.setContentLength(multipartFile.getSize());
 		metadata.setContentType(multipartFile.getContentType());
 
-		amazonS3.putObject(bucket, originalImageName, multipartFile.getInputStream(), metadata);
+		try {
+			amazonS3.putObject(bucket, originalImageName, multipartFile.getInputStream(), metadata);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		return amazonS3.getUrl(bucket, originalImageName).toString();
+	}
+
+	public void deleteImage(String originalImageName){
+		String splitStr = ".com/";
+		String fileName = originalImageName.substring(originalImageName.lastIndexOf(splitStr) + splitStr.length());
+		String file = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+		amazonS3.deleteObject(bucket, file);
 	}
 }

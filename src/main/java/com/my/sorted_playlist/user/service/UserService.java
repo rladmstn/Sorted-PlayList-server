@@ -1,7 +1,5 @@
 package com.my.sorted_playlist.user.service;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,22 +27,18 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final ImageService imageService;
 
-	public void register(RegisterRequest registerRequest, MultipartFile profileImage) {
-		try {
-			validateDuplicatedEmail(registerRequest.email());
-			String imageUrl = imageService.saveImage(profileImage);
+	public void register(RegisterRequest registerRequest, MultipartFile profileImage){
+		validateDuplicatedEmail(registerRequest.email());
+		String imageUrl = imageService.saveImage(profileImage);
 
-			userRepository.save(registerRequest.toEntity(
-				registerRequest.email(),
-				passwordEncoder.encode(registerRequest.password()),
-				registerRequest.nickname(),
-				imageUrl,
-				Role.USER
-			));
-			log.info("success to register");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		userRepository.save(registerRequest.toEntity(
+			registerRequest.email(),
+			passwordEncoder.encode(registerRequest.password()),
+			registerRequest.nickname(),
+			imageUrl,
+			Role.USER
+		));
+		log.info("success to register");
 	}
 
 	public void validateDuplicatedEmail(String email){
@@ -60,7 +54,21 @@ public class UserService {
 		if (! passwordEncoder.matches(logInRequest.password(), encodedPassword))
 			throw new LogInException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다");
 
+		log.info("success to login");
 		return new UserResponse(user.getId(),user.getEmail(),user.getNickname(),user.getProfileImage()); // 비밀번호를 제거한 user 객체 반환
+	}
+
+	public User editUserInfo(User currUser, String nickname, MultipartFile profileImage){
+		User user = userRepository.findByIdAndEmail(currUser.getId(), currUser.getEmail());
+		if(nickname != null && !nickname.isBlank())
+			user.editNickname(nickname);
+		if(profileImage != null && !profileImage.isEmpty()){
+			String imageUrl = imageService.saveImage(profileImage);
+			imageService.deleteImage(user.getProfileImage());
+			user.editProfileImage(imageUrl);
+		}
+		log.info("success to edit user information");
+		return user;
 	}
 
 }
