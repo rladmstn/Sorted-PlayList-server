@@ -3,6 +3,8 @@ package com.my.sorted_playlist.user.service;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,17 +31,17 @@ public class ImageService {
 		if(multipartFile == null)
 			return null;
 		String originalImageName = multipartFile.getOriginalFilename();
-
+		String fileName = UUID.randomUUID().toString().concat(Objects.requireNonNull(originalImageName));
 		ObjectMetadata metadata = new ObjectMetadata();
 		metadata.setContentLength(multipartFile.getSize());
 		metadata.setContentType(multipartFile.getContentType());
 
 		try {
-			amazonS3.putObject(bucket, originalImageName, multipartFile.getInputStream(), metadata);
+			amazonS3.putObject(bucket, fileName, multipartFile.getInputStream(), metadata);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return amazonS3.getUrl(bucket, originalImageName).toString();
+		return amazonS3.getUrl(bucket, fileName).toString();
 	}
 
 	public void deleteImage(String originalImageName){
