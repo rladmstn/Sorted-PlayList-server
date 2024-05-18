@@ -24,7 +24,7 @@ import com.my.sorted_playlist.user.dto.LogInRequest;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.user.dto.UserInfoResponse;
 import com.my.sorted_playlist.user.dto.UserResponse;
-import com.my.sorted_playlist.user.exception.LogInException;
+import com.my.sorted_playlist.user.exception.UserPermissionException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
 import com.my.sorted_playlist.user.repository.UserRepository;
 
@@ -109,7 +109,7 @@ class UserServiceTest {
 		// given
 		// when, then
 		assertThatThrownBy(() -> userService.logIn(logInRequest))
-			.isInstanceOf(LogInException.class)
+			.isInstanceOf(UserPermissionException.class)
 			.hasFieldOrPropertyWithValue("status",HttpStatus.UNAUTHORIZED.value())
 			.hasFieldOrPropertyWithValue("error","가입되지 않은 이메일 입니다.");
 	}
@@ -122,7 +122,7 @@ class UserServiceTest {
 		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 		// when, then
 		assertThatThrownBy(() -> userService.logIn(logInRequest))
-			.isInstanceOf(LogInException.class)
+			.isInstanceOf(UserPermissionException.class)
 			.hasFieldOrPropertyWithValue("status",HttpStatus.UNAUTHORIZED.value())
 			.hasFieldOrPropertyWithValue("error","비밀번호가 틀렸습니다.");
 	}

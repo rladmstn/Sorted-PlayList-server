@@ -2,6 +2,7 @@ package com.my.sorted_playlist.user.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,6 +82,13 @@ public class UserController {
 	@Operation(summary = "회원 정보 조회", description = "회원의 이메일, 닉네임, 프로필 사진을 조회하는 API")
 	public ResponseEntity<Object> getUserInfo(@CurrentUser User user){
 		return ResponseEntity.ok().body(userService.getUserInfo(user));
+	}
+
+	@DeleteMapping
+	@Operation(summary = "회원 탈퇴", description = "비밀번호로 본인 인증 후 회원을 탈퇴하는 API")
+	public ResponseEntity<Object> unregister(@CurrentUser User user, @RequestParam String password){
+		userService.unregister(user, password);
+		return ResponseEntity.ok().body("OK");
 	}
 
 	@GetMapping("/test")
