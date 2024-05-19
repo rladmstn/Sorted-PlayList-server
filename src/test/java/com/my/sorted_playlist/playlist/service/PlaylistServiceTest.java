@@ -44,18 +44,25 @@ class PlaylistServiceTest {
 	private final String newName = "newName";
 	private EditPlaylistNameRequest editRequest;
 	private User user;
+	private User diffUser;
 	private Playlist playlist;
 	private Playlist playlist2;
 	@BeforeEach
 	void set() throws NoSuchFieldException, IllegalAccessException {
 		user = User.builder().email("email").password("password").nickname("nickname").profileImage("image").role(Role.USER).build();
+		diffUser = User.builder().email("anotherName").password("password").nickname("nickname").profileImage("image").role(Role.USER).build();
 		playlist = Playlist.builder().name(playListName).user(user).createdDateTime(LocalDateTime.now()).songCount(0).build();
 		playlist2 = Playlist.builder().name(newName).user(user).createdDateTime(LocalDateTime.now()).songCount(0).build();
 		editRequest = new EditPlaylistNameRequest(1L,newName);
 
+
 		Field userIdField = User.class.getDeclaredField("id");
 		userIdField.setAccessible(true);
 		userIdField.set(user, 1L);
+
+		Field userIdField2 = User.class.getDeclaredField("id");
+		userIdField2.setAccessible(true);
+		userIdField2.set(diffUser, 2L);
 
 		Field playlistIdField = Playlist.class.getDeclaredField("id");
 		playlistIdField.setAccessible(true);
@@ -118,11 +125,6 @@ class PlaylistServiceTest {
 	@DisplayName("플레이리스트 이름 수정 실패 : 플레이리스트의 주인 불일치")
 	void 플레이리스트이름수정_실패_플레이리스트주인불일치() throws NoSuchFieldException, IllegalAccessException {
 		// given
-		User diffUser = User.builder().email("anotherName").password("password").nickname("nickname").profileImage("image").role(Role.USER).build();
-		Field userIdField = User.class.getDeclaredField("id");
-		userIdField.setAccessible(true);
-		userIdField.set(diffUser, 2L);
-
 		when(playListRepository.findById(editRequest.playlistId())).thenReturn(Optional.ofNullable(playlist));
 		// when, then
 		assertThatThrownBy(() -> playListService.editPlayListName(diffUser,editRequest))
@@ -142,6 +144,41 @@ class PlaylistServiceTest {
 		// then
 		verify(playListRepository,times(1)).findAllByUser(user);
 		assertThat(result).hasSize(2);
+	}
+
+	@Test
+	@DisplayName("플레이리스트 삭제 성공")
+	void 플레이리스트삭제_성공(){
+		// given
+		when(playListRepository.findById(10L)).thenReturn(Optional.ofNullable(playlist));
+		// when
+		playListService.deletePlaylist(user,10L);
+		// then
+		verify(playListRepository,times(1)).deleteById(10L);
+	}
+
+	@Test
+	@DisplayName("플레이리스트 삭제 실패 : 존재하지 않는 플레이리스트")
+	void 플레이리스트삭제_실패_존재하지않는플레이리스트(){
+		// given
+		when(playListRepository.findById(10L)).thenReturn(Optional.empty());
+		// when, then
+		assertThatThrownBy(() -> playListService.deletePlaylist(user, 10L))
+			.isInstanceOf(PlaylistPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.UNAUTHORIZED.value())
+			.hasFieldOrPropertyWithValue("error","존재하지 않는 플레이리스트 입니다.");
+	}
+
+	@Test
+	@DisplayName("플레이리스트 삭제 실패 : 플레이리스트의 주인 불일치")
+	void 플레이리스트삭제_실패_플레이리스트주인불일치(){
+		// given
+		when(playListRepository.findById(10L)).thenReturn(Optional.ofNullable(playlist));
+		// when, then
+		assertThatThrownBy(() -> playListService.deletePlaylist(diffUser,10L))
+			.isInstanceOf(PlaylistPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
+			.hasFieldOrPropertyWithValue("error","플레이리스트의 주인과 사용자가 일치하지 않습니다.");
 	}
 
 }
