@@ -38,4 +38,8 @@ public class Playlist {
 		this.createdDateTime = createdDateTime;
 		this.songCount = songCount;
 	}
+
+	public void editName(String name){
+		this.name = name;
+	}
 }

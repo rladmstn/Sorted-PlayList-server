@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.user.exception.UserPermissionException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
 
@@ -23,6 +24,10 @@ public class CustomExceptionHandler {
 
 	@ExceptionHandler(UserPermissionException.class)
 	protected ResponseEntity<Object> handler(UserPermissionException e){
+		return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getStatus(), e.getError(), null));
+	}
+	@ExceptionHandler(PlaylistPermissionException.class)
+	protected ResponseEntity<Object> handler(PlaylistPermissionException e){
 		return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getStatus(), e.getError(), null));
 	}
 
