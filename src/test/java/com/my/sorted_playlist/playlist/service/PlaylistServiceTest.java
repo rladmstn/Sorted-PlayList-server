@@ -5,6 +5,8 @@ import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.dto.EditPlaylistNameRequest;
+import com.my.sorted_playlist.playlist.dto.GetPlaylistResponse;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.exception.PlaylistRequestException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
@@ -42,10 +45,12 @@ class PlaylistServiceTest {
 	private EditPlaylistNameRequest editRequest;
 	private User user;
 	private Playlist playlist;
+	private Playlist playlist2;
 	@BeforeEach
 	void set() throws NoSuchFieldException, IllegalAccessException {
 		user = User.builder().email("email").password("password").nickname("nickname").profileImage("image").role(Role.USER).build();
-		playlist = Playlist.builder().name("name").user(user).createdDateTime(LocalDateTime.now()).songCount(0).build();
+		playlist = Playlist.builder().name(playListName).user(user).createdDateTime(LocalDateTime.now()).songCount(0).build();
+		playlist2 = Playlist.builder().name(newName).user(user).createdDateTime(LocalDateTime.now()).songCount(0).build();
 		editRequest = new EditPlaylistNameRequest(1L,newName);
 
 		Field userIdField = User.class.getDeclaredField("id");
@@ -55,6 +60,10 @@ class PlaylistServiceTest {
 		Field playlistIdField = Playlist.class.getDeclaredField("id");
 		playlistIdField.setAccessible(true);
 		playlistIdField.set(playlist, 10L);
+
+		Field playlistIdField2 = Playlist.class.getDeclaredField("id");
+		playlistIdField2.setAccessible(true);
+		playlistIdField2.set(playlist2, 11L);
 	}
 
 	@Test
@@ -120,6 +129,19 @@ class PlaylistServiceTest {
 			.isInstanceOf(PlaylistPermissionException.class)
 			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
 			.hasFieldOrPropertyWithValue("error","플레이리스트의 주인과 사용자가 일치하지 않습니다.");
+	}
+
+	@Test
+	@DisplayName("플레이리스트 전체 조회 성공")
+	void 플레이리스트전체조회_성공(){
+		// given
+		List<Playlist> playlists = Arrays.asList(playlist, playlist2);
+		when(playListRepository.findAllByUser(user)).thenReturn(playlists);
+		// when
+		List<GetPlaylistResponse> result = playListService.getPlayLists(user);
+		// then
+		verify(playListRepository,times(1)).findAllByUser(user);
+		assertThat(result).hasSize(2);
 	}
 
 }
