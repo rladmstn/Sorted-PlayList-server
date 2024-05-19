@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import com.my.sorted_playlist.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -52,5 +54,12 @@ public class PlaylistController {
 	public ResponseEntity<Object> getMyPlayList(@CurrentUser User user){
 		List<GetPlaylistResponse> responses = playListService.getPlayLists(user);
 		return ResponseEntity.ok().body(responses);
+	}
+
+	@DeleteMapping
+	@Operation(summary = "플레이리스트 삭제", description = "플레이리스트의 id를 입력받아 삭제하는 API")
+	public ResponseEntity<Object> deletePlayList(@CurrentUser User user, @NotNull Long playlistId){
+		playListService.deletePlaylist(user,playlistId);
+		return ResponseEntity.ok().body("OK");
 	}
 }

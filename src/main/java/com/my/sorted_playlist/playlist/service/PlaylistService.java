@@ -38,11 +38,7 @@ public class PlaylistService {
 	}
 
 	public Playlist editPlayListName(User user, EditPlaylistNameRequest request) {
-		Playlist playlist = playlistRepository.findById(request.playlistId())
-			.orElseThrow(() -> new PlaylistPermissionException(HttpStatus.UNAUTHORIZED.value(), "존재하지 않는 플레이리스트 입니다."));
-
-		if(!playlist.getUser().getId().equals(user.getId()))
-			throw new PlaylistPermissionException(HttpStatus.FORBIDDEN.value(), "플레이리스트의 주인과 사용자가 일치하지 않습니다.");
+		Playlist playlist = checkPermission(request.playlistId(), user);
 
 		playlist.editName(request.name());
 		log.info("success to edit playlist name");
@@ -54,5 +50,20 @@ public class PlaylistService {
 			.stream().map(Playlist::toDTO).toList();
 		log.info("success to get playlists");
 		return response;
+	}
+
+	public void deletePlaylist(User user, Long playlistId) {
+		checkPermission(playlistId, user);
+		playlistRepository.deleteById(playlistId);
+		log.info("success to delete playlist");
+	}
+
+	private Playlist checkPermission(Long playlistId, User user) {
+		Playlist playlist = playlistRepository.findById(playlistId)
+			.orElseThrow(() -> new PlaylistPermissionException(HttpStatus.UNAUTHORIZED.value(), "존재하지 않는 플레이리스트 입니다."));
+
+		if (!playlist.getUser().getId().equals(user.getId()))
+			throw new PlaylistPermissionException(HttpStatus.FORBIDDEN.value(), "플레이리스트의 주인과 사용자가 일치하지 않습니다.");
+		return playlist;
 	}
 }
