@@ -2,6 +2,7 @@ package com.my.sorted_playlist.playlist.domain;
 
 import java.time.LocalDateTime;
 
+import com.my.sorted_playlist.playlist.dto.GetPlaylistResponse;
 import com.my.sorted_playlist.user.domain.User;
 
 import jakarta.persistence.Entity;
@@ -41,5 +42,12 @@ public class Playlist {
 
 	public void editName(String name){
 		this.name = name;
+	}
+
+	public static GetPlaylistResponse toDTO(Playlist playlist){
+		return new GetPlaylistResponse(playlist.getId(),
+			playlist.getName(),
+			playlist.getCreatedDateTime(),
+			playlist.getSongCount());
 	}
 }

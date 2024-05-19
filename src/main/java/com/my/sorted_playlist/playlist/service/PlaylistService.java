@@ -1,12 +1,14 @@
 package com.my.sorted_playlist.playlist.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.dto.EditPlaylistNameRequest;
+import com.my.sorted_playlist.playlist.dto.GetPlaylistResponse;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
 import com.my.sorted_playlist.user.domain.User;
@@ -42,5 +44,12 @@ public class PlaylistService {
 		playlist.editName(request.name());
 		log.info("success to edit playlist name");
 		return playlist;
+	}
+
+	public List<GetPlaylistResponse> getPlayLists(User user) {
+		List<GetPlaylistResponse> response = playlistRepository.findAllByUser(user)
+			.stream().map(Playlist::toDTO).toList();
+		log.info("success to get playlists");
+		return response;
 	}
 }
