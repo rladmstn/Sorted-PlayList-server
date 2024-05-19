@@ -8,5 +8,7 @@ import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.user.domain.User;
 
 public interface PlaylistRepository extends JpaRepository<Playlist,Long> {
+
+	boolean existsByUserAndName(User user,String name);
 	List<Playlist> findAllByUser(User user);
 }

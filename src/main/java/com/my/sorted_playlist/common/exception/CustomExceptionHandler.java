@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
+import com.my.sorted_playlist.playlist.exception.PlaylistRequestException;
 import com.my.sorted_playlist.user.exception.UserPermissionException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
 
@@ -34,5 +35,10 @@ public class CustomExceptionHandler {
 	@ExceptionHandler(UserAccessException.class)
 	protected ResponseEntity<Object> handler(UserAccessException e){
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), e.getError(), null));
+	}
+
+	@ExceptionHandler(PlaylistRequestException.class)
+	protected ResponseEntity<Object> handler(PlaylistRequestException e){
+		return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getError(),null));
 	}
 }

@@ -10,6 +10,7 @@ import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.dto.EditPlaylistNameRequest;
 import com.my.sorted_playlist.playlist.dto.GetPlaylistResponse;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
+import com.my.sorted_playlist.playlist.exception.PlaylistRequestException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
 import com.my.sorted_playlist.user.domain.User;
 
@@ -25,6 +26,8 @@ public class PlaylistService {
 	private final PlaylistRepository playlistRepository;
 
 	public void createPlayList(User user, String name){
+		if(playlistRepository.existsByUserAndName(user,name))
+			throw new PlaylistRequestException("중복되는 이름의 플레이리스트가 있습니다.");
 		playlistRepository.save(Playlist.builder()
 			.user(user)
 			.name(name)
