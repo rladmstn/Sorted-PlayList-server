@@ -22,6 +22,7 @@ import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.dto.EditPlaylistNameRequest;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
+import com.my.sorted_playlist.playlist.exception.PlaylistRequestException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
 import com.my.sorted_playlist.user.domain.User;
 
@@ -68,6 +69,17 @@ class PlaylistServiceTest {
 		assertThat(playList.getName()).isEqualTo(playListName);
 		assertThat(playList.getUser()).isEqualTo(user);
 		assertThat(playList.getSongCount()).isEqualTo(0);
+	}
+
+	@Test
+	@DisplayName("플레이리스트 생성 실패 : 중복되는 이름의 플레이리스트 존재")
+	void 플레이리스트생성_실패_중복이름(){
+		// given
+		when(playListRepository.existsByUserAndName(user,playListName)).thenReturn(true);
+		// when, then
+		assertThatThrownBy(() -> playListService.createPlayList(user,playListName))
+			.isInstanceOf(PlaylistRequestException.class)
+			.hasFieldOrPropertyWithValue("error","중복되는 이름의 플레이리스트가 있습니다.");
 	}
 
 	@Test
