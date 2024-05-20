@@ -43,6 +43,9 @@ public class Playlist {
 	public void editName(String name){
 		this.name = name;
 	}
+	public void updateSongCount(int cnt){
+		this.songCount += cnt;
+	}
 
 	public static GetPlaylistResponse toDTO(Playlist playlist){
 		return new GetPlaylistResponse(playlist.getId(),

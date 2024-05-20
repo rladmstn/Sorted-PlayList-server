@@ -1,7 +1,6 @@
 package com.my.sorted_playlist.song.domain;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.my.sorted_playlist.playlist.domain.Playlist;
 
@@ -30,22 +29,22 @@ public class Song {
 
 	private String title;
 	private String singer;
-	private LocalTime songLength;
+	private String songLength;
 	private Integer songPlayCount;
-	private String songUrl;
+	private String songVideoId;
 	private LocalDateTime addedDateTime;
 	private LocalDateTime lastPlayedDateTime;
 
 	@Builder
-	public Song(Playlist playlist, String title, String singer, LocalTime songLength, Integer songPlayCount,
-		String songUrl,
+	public Song(Playlist playlist, String title, String singer, String songLength, Integer songPlayCount,
+		String songVideoId,
 		LocalDateTime addedDateTime, LocalDateTime lastPlayedDateTime) {
 		this.playlist = playlist;
 		this.title = title;
 		this.singer = singer;
 		this.songLength = songLength;
 		this.songPlayCount = songPlayCount;
-		this.songUrl = songUrl;
+		this.songVideoId = songVideoId;
 		this.addedDateTime = addedDateTime;
 		this.lastPlayedDateTime = lastPlayedDateTime;
 	}
