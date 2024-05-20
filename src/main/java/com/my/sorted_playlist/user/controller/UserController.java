@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.my.sorted_playlist.common.annotation.CurrentUser;
+import com.my.sorted_playlist.common.annotation.SessionInfo;
 import com.my.sorted_playlist.user.domain.User;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.common.exception.RequestException;
@@ -65,9 +66,8 @@ public class UserController {
 
 		httpServletRequest.getSession().invalidate(); // 기존 세션 파기하기
 		HttpSession session = httpServletRequest.getSession(true); // 세션 없으면 생성
-		session.setAttribute("loginUser", user);
-		session.setMaxInactiveInterval(60 * 60 * 8); // Session 8시간 유지
-
+		session.setAttribute("sessionInfo", new SessionInfo(user.id(), user.email()));
+		session.setMaxInactiveInterval(60*60);
 		return ResponseEntity.ok().body("OK");
 	}
 
