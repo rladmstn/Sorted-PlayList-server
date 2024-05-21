@@ -27,6 +27,7 @@ import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
 import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
+import com.my.sorted_playlist.song.exception.SongPermissionException;
 import com.my.sorted_playlist.song.repository.SongRepository;
 import com.my.sorted_playlist.user.domain.User;
 
@@ -145,4 +146,38 @@ class SongServiceTest {
 		assertThat(result.get(1).id()).isEqualTo(songId2);
 	}
 
+	@Test
+	@DisplayName("플레이르스트에서 노래 삭제 성공")
+	void 플레이리스트에서노래삭제_성공(){
+		// given
+		when(songRepository.findById(songId1)).thenReturn(Optional.ofNullable(song1));
+		// when
+		songService.deleteSongFromPlaylist(user,songId1);
+		// then
+		verify(songRepository,times(1)).delete(song1);
+	}
+
+	@Test
+	@DisplayName("플레이리스트에서 노래 삭제 실패 : 존재하지 않는 노래")
+	void 플레이리스트에서노래삭제_실패_존재하지않는노래(){
+		// given
+		when(songRepository.findById(songId1)).thenReturn(Optional.empty());
+		// when, then
+		assertThatThrownBy(() -> songService.deleteSongFromPlaylist(user, songId1))
+			.isInstanceOf(SongPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.UNAUTHORIZED.value())
+			.hasFieldOrPropertyWithValue("error","플레이리스트에 존재하지 않는 노래입니다.");
+	}
+
+	@Test
+	@DisplayName("플레이리스트에서 노래 삭제 실패 : 노래의 주인 불일치")
+	void 플레이리스트에서노래삭제_실패_주인불일치(){
+		// given
+		when(songRepository.findById(songId1)).thenReturn(Optional.ofNullable(song1));
+		// when, then
+		assertThatThrownBy(() -> songService.deleteSongFromPlaylist(diffUser,songId1))
+			.isInstanceOf(SongPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
+			.hasFieldOrPropertyWithValue("error","노래 주인과 사용자가 일치하지 않습니다.");
+	}
 }
