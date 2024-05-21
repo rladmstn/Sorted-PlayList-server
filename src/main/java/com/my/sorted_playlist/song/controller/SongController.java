@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,5 +45,12 @@ public class SongController {
 	public ResponseEntity<List<GetSongResponse>> getSongs(@CurrentUser User user, @RequestParam Long playlistId){
 		List<GetSongResponse> response = songService.getSongsInPlaylist(user, playlistId);
 		return ResponseEntity.ok().body(response);
+	}
+
+	@DeleteMapping
+	@Operation(summary = "플레이리스트에서 노래 삭제 API", description = "플레이리스트에서 선택한 노래를 삭제하는 API")
+	public ResponseEntity<Object> deleteSong(@CurrentUser User user, @RequestParam Long songId){
+		songService.deleteSongFromPlaylist(user, songId);
+		return ResponseEntity.ok().body("OK");
 	}
 }

@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
+import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
+import com.my.sorted_playlist.song.exception.SongPermissionException;
 import com.my.sorted_playlist.song.repository.SongRepository;
 import com.my.sorted_playlist.user.domain.User;
 
@@ -25,21 +27,38 @@ public class SongService {
 	private final SongRepository songRepository;
 	private final PlaylistRepository playlistRepository;
 	public void addSongToPlaylist(User user, AddSongRequest addSongRequest) {
-		Playlist playlist = checkPermission(addSongRequest.playlistId(), user);
+		Playlist playlist = checkPlaylistPermission(addSongRequest.playlistId(), user);
 		songRepository.save(addSongRequest.toEntity(playlist));
 		playlist.updateSongCount(+1);
 		log.info("success to add song to playlist");
 	}
 
 	public List<GetSongResponse> getSongsInPlaylist(User user, Long playlistId) {
-		Playlist playlist = checkPermission(playlistId, user);
+		Playlist playlist = checkPlaylistPermission(playlistId, user);
 		List<GetSongResponse> result = songRepository.findAllByPlaylist(playlist)
 			.stream().map(GetSongResponse::toDTO).toList();
 		log.info("success to get songs in playlist");
 		return result;
 	}
 
-	private Playlist checkPermission(Long playlistId, User user) {
+	public void deleteSongFromPlaylist(User user, Long songId) {
+		Song song = checkSongPermission(user, songId);
+		Playlist playlist = song.getPlaylist();
+		songRepository.delete(song); // 노래 삭제
+		playlist.updateSongCount(-1); // 플레이리스트에서 노래 개수 업데이트
+		log.info("success to delete song from the playlist");
+	}
+
+	private Song checkSongPermission(User user, Long songId) {
+		Song song = songRepository.findById(songId)
+			.orElseThrow(() -> new SongPermissionException(HttpStatus.UNAUTHORIZED.value(), "플레이리스트에 존재하지 않는 노래입니다."));
+
+		if (!song.getPlaylist().getUser().getId().equals(user.getId()))
+			throw new SongPermissionException(HttpStatus.FORBIDDEN.value(), "노래 주인과 사용자가 일치하지 않습니다.");
+		return song;
+	}
+
+	private Playlist checkPlaylistPermission(Long playlistId, User user) {
 		Playlist playlist = playlistRepository.findById(playlistId)
 			.orElseThrow(() -> new PlaylistPermissionException(HttpStatus.UNAUTHORIZED.value(), "존재하지 않는 플레이리스트 입니다."));
 
