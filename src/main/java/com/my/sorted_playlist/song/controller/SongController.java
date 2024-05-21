@@ -1,15 +1,20 @@
 package com.my.sorted_playlist.song.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.my.sorted_playlist.common.annotation.CurrentUser;
 import com.my.sorted_playlist.common.exception.RequestException;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
+import com.my.sorted_playlist.song.dto.GetSongResponse;
 import com.my.sorted_playlist.song.service.SongService;
 import com.my.sorted_playlist.user.domain.User;
 
@@ -32,5 +37,12 @@ public class SongController {
 			throw new RequestException("노래 추가 입력이 올바르지 않습니다.",errors);
 		songService.addSongToPlaylist(user,request);
 		return ResponseEntity.ok().body("OK");
+	}
+
+	@GetMapping
+	@Operation(summary = "플레이리스트의 노래 목록 조회 API", description = "선택한 플레이리스트의 노래 목록을 조회하는 API")
+	public ResponseEntity<List<GetSongResponse>> getSongs(@CurrentUser User user, @RequestParam Long playlistId){
+		List<GetSongResponse> response = songService.getSongsInPlaylist(user, playlistId);
+		return ResponseEntity.ok().body(response);
 	}
 }
