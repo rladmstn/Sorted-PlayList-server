@@ -78,6 +78,12 @@ public class SongService {
 		return song;
 	}
 
+	public void updateSongPlayInfo(User user, Long songId) {
+		Song song = checkSongPermission(user, songId);
+		song.updatePlayInfo();
+		log.info("success to update song's play info");
+	}
+
 	private Song checkSongPermission(User user, Long songId) {
 		Song song = songRepository.findById(songId)
 			.orElseThrow(() -> new SongPermissionException(HttpStatus.UNAUTHORIZED.value(), "플레이리스트에 존재하지 않는 노래입니다."));

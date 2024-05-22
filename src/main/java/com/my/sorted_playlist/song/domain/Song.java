@@ -41,6 +41,10 @@ public class Song {
 	public void editSinger(String singer){
 		this.singer = singer;
 	}
+	public void updatePlayInfo(){
+		this.songPlayCount += 1;
+		this.lastPlayedDateTime = LocalDateTime.now();
+	}
 
 	@Builder
 	public Song(Playlist playlist, String title, String singer, String songLength, Integer songPlayCount,

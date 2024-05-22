@@ -73,4 +73,11 @@ public class SongController {
 		songService.editSong(user, request);
 		return ResponseEntity.ok().body("OK");
 	}
+
+	@PostMapping("/play")
+	@Operation(summary = "최근 재생한 날짜/시간, 재생 횟수 업데이트 API", description = "노래 재생 시 최근 재생한 날짜/시간, 재생 횟수를 업데이트하는 API")
+	public ResponseEntity<Object> updateSongPlayInfo(@CurrentUser User user, @RequestParam Long songId){
+		songService.updateSongPlayInfo(user,songId);
+		return ResponseEntity.ok().body("OK");
+	}
 }
