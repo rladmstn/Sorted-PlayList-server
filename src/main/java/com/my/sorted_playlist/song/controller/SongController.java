@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.my.sorted_playlist.common.annotation.CurrentUser;
 import com.my.sorted_playlist.common.exception.RequestException;
-import com.my.sorted_playlist.song.Order;
+import com.my.sorted_playlist.song.enumerate.Order;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
 import com.my.sorted_playlist.song.service.SongService;

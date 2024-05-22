@@ -1,4 +1,4 @@
-package com.my.sorted_playlist.song;
+package com.my.sorted_playlist.song.enumerate;
 
 public enum Order {
 	TITLE,

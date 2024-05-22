@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
-import com.my.sorted_playlist.song.Order;
+import com.my.sorted_playlist.song.enumerate.Order;
 import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
