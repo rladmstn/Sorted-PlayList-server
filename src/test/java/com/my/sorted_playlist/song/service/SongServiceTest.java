@@ -24,6 +24,7 @@ import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
+import com.my.sorted_playlist.song.enumerate.Order;
 import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
@@ -47,6 +48,7 @@ class SongServiceTest {
 	private Playlist playlist;
 	private Song song1;
 	private Song song2;
+	private Song song3;
 	private final String songVideoId = "SONGVIDEOID";
 	private final String title = "title";
 	private final String singer = "singer";
@@ -54,6 +56,7 @@ class SongServiceTest {
 	private final Long playlistId = 10L;
 	private final Long songId1 = 30L;
 	private final Long songId2 = 31L;
+	private final Long songId3 = 32L;
 
 	@BeforeEach
 	void set() throws IllegalAccessException, NoSuchFieldException {
@@ -62,12 +65,15 @@ class SongServiceTest {
 
 		playlist = Playlist.builder().name("playlist").user(user).createdDateTime(LocalDateTime.now()).songCount(0).build();
 
-		song1 = Song.builder().playlist(playlist).title("title1").singer("singer1")
-			.songLength("songLength1").songPlayCount(0).songVideoId("songVideoId1")
-			.addedDateTime(LocalDateTime.now()).lastPlayedDateTime(LocalDateTime.now()).build();
-		song2 = Song.builder().playlist(playlist).title("title2").singer("singer2")
-			.songLength("songLength2").songPlayCount(0).songVideoId("songVideoId2")
-			.addedDateTime(LocalDateTime.now()).lastPlayedDateTime(LocalDateTime.now()).build();
+		song1 = Song.builder().playlist(playlist).title("ATitle").singer("singer1")
+			.songLength("songLength1").songPlayCount(2).songVideoId("songVideoId1")
+			.addedDateTime(LocalDateTime.now().plusDays(3)).lastPlayedDateTime(LocalDateTime.now().plusDays(7)).build();
+		song2 = Song.builder().playlist(playlist).title("CTitle").singer("singer2")
+			.songLength("songLength2").songPlayCount(10).songVideoId("songVideoId2")
+			.addedDateTime(LocalDateTime.now().plusDays(4)).lastPlayedDateTime(LocalDateTime.now().plusDays(8)).build();
+		song3 = Song.builder().playlist(playlist).title("BTitle").singer("singer3")
+			.songLength("songLength3").songPlayCount(5).songVideoId("songVideoId3")
+			.addedDateTime(LocalDateTime.now().plusDays(2)).lastPlayedDateTime(LocalDateTime.now().plusDays(6)).build();
 
 		Field userIdField = User.class.getDeclaredField("id");
 		userIdField.setAccessible(true);
@@ -82,6 +88,7 @@ class SongServiceTest {
 		songIdField.setAccessible(true);
 		songIdField.set(song1,songId1);
 		songIdField.set(song2,songId2);
+		songIdField.set(song3,songId3);
 	}
 
 	@Test
@@ -140,8 +147,8 @@ class SongServiceTest {
 		// then
 		verify(songRepository,times(1)).findAllByPlaylist(playlist);
 		assertThat(result).hasSize(2);
-		assertThat(result.get(0).title()).isEqualTo("title1");
-		assertThat(result.get(1).title()).isEqualTo("title2");
+		assertThat(result.get(0).title()).isEqualTo("ATitle");
+		assertThat(result.get(1).title()).isEqualTo("CTitle");
 		assertThat(result.get(0).id()).isEqualTo(songId1);
 		assertThat(result.get(1).id()).isEqualTo(songId2);
 	}
@@ -179,5 +186,81 @@ class SongServiceTest {
 			.isInstanceOf(SongPermissionException.class)
 			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
 			.hasFieldOrPropertyWithValue("error","노래 주인과 사용자가 일치하지 않습니다.");
+	}
+
+	@Test
+	@DisplayName("제목 순으로 정렬된 노래 목록 조회 성공")
+	void 제목순으로정렬된노래목록조회_성공(){
+		// given
+		List<Song> songs = Arrays.asList(song1, song3, song2);
+		List<GetSongResponse> expected = Arrays.asList(GetSongResponse.toDTO(song1),GetSongResponse.toDTO(song3),GetSongResponse.toDTO(song2));
+		when(playlistRepository.findById(playlistId)).thenReturn(Optional.ofNullable(playlist));
+		when(songRepository.findAllByPlaylistOrderByTitle(playlist)).thenReturn(songs);
+		// when
+		List<GetSongResponse> songsOrderBy = songService.getSongsOrderBy(user, playlistId, Order.TITLE);
+		// then
+		assertThat(songsOrderBy).isEqualTo(expected);
+	}
+	@Test
+	@DisplayName("노래를 최근 추가한 순서로 정렬된 노래 목록 조회 성공")
+	void 최근추가한순서로노래목록조회_성공(){
+		// given
+		List<Song> songs = Arrays.asList(song3, song1, song2);
+		List<GetSongResponse> expected = Arrays.asList(GetSongResponse.toDTO(song3),GetSongResponse.toDTO(song1),GetSongResponse.toDTO(song2));
+		when(playlistRepository.findById(playlistId)).thenReturn(Optional.ofNullable(playlist));
+		when(songRepository.findAllByPlaylistOrderByTitle(playlist)).thenReturn(songs);
+		// when
+		List<GetSongResponse> songsOrderBy = songService.getSongsOrderBy(user, playlistId, Order.TITLE);
+		// then
+		assertThat(songsOrderBy).isEqualTo(expected);
+	}
+	@Test
+	@DisplayName("가장 많이 재생한 순으로 정렬된 노래 목록 조회 성공")
+	void 가장많이재생한순으로정렬된노래목록조회_성공(){
+		// given
+		List<Song> songs = Arrays.asList(song2, song3, song1);
+		List<GetSongResponse> expected = Arrays.asList(GetSongResponse.toDTO(song2),GetSongResponse.toDTO(song3),GetSongResponse.toDTO(song1));
+		when(playlistRepository.findById(playlistId)).thenReturn(Optional.ofNullable(playlist));
+		when(songRepository.findAllByPlaylistOrderByTitle(playlist)).thenReturn(songs);
+		// when
+		List<GetSongResponse> songsOrderBy = songService.getSongsOrderBy(user, playlistId, Order.TITLE);
+		// then
+		assertThat(songsOrderBy).isEqualTo(expected);
+	}
+	@Test
+	@DisplayName("가장 최근에 재생된 순으로 정렬된 노래 목록 조회 성공")
+	void 가장최근에재생된순으로정렬된노래목록조회_성공(){
+		// given
+		List<Song> songs = Arrays.asList(song2, song1, song3);
+		List<GetSongResponse> expected = Arrays.asList(GetSongResponse.toDTO(song2),GetSongResponse.toDTO(song1),GetSongResponse.toDTO(song3));
+		when(playlistRepository.findById(playlistId)).thenReturn(Optional.ofNullable(playlist));
+		when(songRepository.findAllByPlaylistOrderByTitle(playlist)).thenReturn(songs);
+		// when
+		List<GetSongResponse> songsOrderBy = songService.getSongsOrderBy(user, playlistId, Order.TITLE);
+		// then
+		assertThat(songsOrderBy).isEqualTo(expected);
+	}
+
+	@Test
+	@DisplayName("정렬된 노래 목록 조회 실패 : 존재하지 않는 플레이리스트")
+	void 정렬된노래목록조회_실패_존재하지않는플레이리스트(){
+		// given
+		when(playlistRepository.findById(playlistId)).thenReturn(Optional.empty());
+		// when, then
+		assertThatThrownBy(() -> songService.getSongsOrderBy(user,playlistId,Order.TITLE))
+			.isInstanceOf(PlaylistPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.UNAUTHORIZED.value())
+			.hasFieldOrPropertyWithValue("error","존재하지 않는 플레이리스트 입니다.");
+	}
+	@Test
+	@DisplayName("정렬된 노래 목록 조회 실패 : 주인 불일치")
+	void 정렬된노래목록조회_실패_주인불일치(){
+		// given
+		when(playlistRepository.findById(playlistId)).thenReturn(Optional.ofNullable(playlist));
+		// when, then
+		assertThatThrownBy(() -> songService.getSongsOrderBy(diffUser,playlistId,Order.LAST_PLAYED_TIME))
+			.isInstanceOf(PlaylistPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
+			.hasFieldOrPropertyWithValue("error","플레이리스트의 주인과 사용자가 일치하지 않습니다.");
 	}
 }
