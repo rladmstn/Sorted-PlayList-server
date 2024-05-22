@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.my.sorted_playlist.common.annotation.CurrentUser;
 import com.my.sorted_playlist.common.exception.RequestException;
+import com.my.sorted_playlist.song.Order;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
 import com.my.sorted_playlist.song.service.SongService;
@@ -27,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/song")
-@Tag(name = "노래 관련 컨트롤러", description = "플레이리스트 내 노래들에 관련된 API 명세서")
+@Tag(name = "노래 컨트롤러", description = "플레이리스트 내 노래들에 관련된 API 명세서")
 public class SongController {
 	private final SongService songService;
 
@@ -52,5 +54,12 @@ public class SongController {
 	public ResponseEntity<Object> deleteSong(@CurrentUser User user, @RequestParam Long songId){
 		songService.deleteSongFromPlaylist(user, songId);
 		return ResponseEntity.ok().body("OK");
+	}
+
+	@GetMapping("/{order}")
+	@Operation(summary = "선택한 기준으로 정렬된 노래 목록 조회 API", description = "플레이리스트를 선택한 기준으로 정렬해서 노래 목록을 조회하는 API")
+	public ResponseEntity<List<GetSongResponse>> getSongsOrderBy(@CurrentUser User user, @RequestParam Long playlistId, @PathVariable("order") Order order){
+		List<GetSongResponse> response = songService.getSongsOrderBy(user, playlistId, order);
+		return ResponseEntity.ok().body(response);
 	}
 }

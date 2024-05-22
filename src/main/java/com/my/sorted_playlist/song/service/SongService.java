@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
+import com.my.sorted_playlist.song.Order;
 import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
@@ -39,6 +40,23 @@ public class SongService {
 			.stream().map(GetSongResponse::toDTO).toList();
 		log.info("success to get songs in playlist");
 		return result;
+	}
+
+	public List<GetSongResponse> getSongsOrderBy(User user, Long playlistId, Order order) {
+		Playlist playlist = checkPlaylistPermission(playlistId, user);
+		List<Song> songs = getOrderedSongs(order, playlist);
+		List<GetSongResponse> result = songs.stream().map(GetSongResponse::toDTO).toList();
+		log.info("success to get ordered songs in playlist ");
+		return result;
+	}
+
+	private List<Song> getOrderedSongs(Order order, Playlist playlist) {
+		return switch (order) {
+			case TITLE -> songRepository.findAllByPlaylistOrderByTitle(playlist);
+			case ADDED_TIME -> songRepository.findAllByPlaylistOrderByAddedDateTimeDesc(playlist);
+			case PLAY_COUNT -> songRepository.findAllByPlaylistOrderBySongPlayCountDesc(playlist);
+			case LAST_PLAYED_TIME -> songRepository.findAllByPlaylistOrderByLastPlayedDateTimeDesc(playlist);
+		};
 	}
 
 	public void deleteSongFromPlaylist(User user, Long songId) {
