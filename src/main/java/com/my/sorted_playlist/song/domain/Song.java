@@ -35,6 +35,13 @@ public class Song {
 	private LocalDateTime addedDateTime;
 	private LocalDateTime lastPlayedDateTime;
 
+	public void editTitle(String title){
+		this.title = title;
+	}
+	public void editSinger(String singer){
+		this.singer = singer;
+	}
+
 	@Builder
 	public Song(Playlist playlist, String title, String singer, String songLength, Integer songPlayCount,
 		String songVideoId,

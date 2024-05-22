@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.my.sorted_playlist.common.annotation.CurrentUser;
 import com.my.sorted_playlist.common.exception.RequestException;
+import com.my.sorted_playlist.song.dto.EditSongRequest;
 import com.my.sorted_playlist.song.enumerate.Order;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
 import com.my.sorted_playlist.song.dto.GetSongResponse;
@@ -61,5 +63,14 @@ public class SongController {
 	public ResponseEntity<List<GetSongResponse>> getSongsOrderBy(@CurrentUser User user, @RequestParam Long playlistId, @PathVariable("order") Order order){
 		List<GetSongResponse> response = songService.getSongsOrderBy(user, playlistId, order);
 		return ResponseEntity.ok().body(response);
+	}
+
+	@PatchMapping
+	@Operation(summary = "선택한 노래의 제목, 가수 이름 수정 API", description = "선택한 노래의 제목, 가수 이름을 수정하는 API")
+	public ResponseEntity<Object> editSong(@CurrentUser User user, @Valid @RequestBody EditSongRequest request, Errors errors){
+		if (errors.hasErrors())
+			throw new RequestException("노래 제목, 가수 수정의 입력이 올바르지 않습니다.",errors);
+		songService.editSong(user, request);
+		return ResponseEntity.ok().body("OK");
 	}
 }

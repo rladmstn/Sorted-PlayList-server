@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
+import com.my.sorted_playlist.song.dto.EditSongRequest;
 import com.my.sorted_playlist.song.enumerate.Order;
 import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
@@ -65,6 +66,16 @@ public class SongService {
 		songRepository.delete(song); // 노래 삭제
 		playlist.updateSongCount(-1); // 플레이리스트에서 노래 개수 업데이트
 		log.info("success to delete song from the playlist");
+	}
+
+	public Song editSong(User user, EditSongRequest request) {
+		Song song = checkSongPermission(user, request.songId());
+		if (request.title() != null && !request.title().isBlank())
+			song.editTitle(request.title());
+		if (request.singer() != null && !request.singer().isBlank())
+			song.editSinger(request.singer());
+		log.info("success to edit song's title/singer");
+		return song;
 	}
 
 	private Song checkSongPermission(User user, Long songId) {
