@@ -24,6 +24,7 @@ import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
+import com.my.sorted_playlist.song.dto.EditSongRequest;
 import com.my.sorted_playlist.song.enumerate.Order;
 import com.my.sorted_playlist.song.domain.Song;
 import com.my.sorted_playlist.song.dto.AddSongRequest;
@@ -262,5 +263,45 @@ class SongServiceTest {
 			.isInstanceOf(PlaylistPermissionException.class)
 			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
 			.hasFieldOrPropertyWithValue("error","플레이리스트의 주인과 사용자가 일치하지 않습니다.");
+	}
+
+	@Test
+	@DisplayName("선택한 노래의 제목, 가수명 수정 성공")
+	void 노래제목가수명수정_성공(){
+		// given
+		EditSongRequest request = new EditSongRequest(songId1,"newTitle","newSinger");
+		when(songRepository.findById(songId1)).thenReturn(Optional.ofNullable(song1));
+		// when
+		Song song = songService.editSong(user, request);
+		// then
+		assertThat(song.getId()).isEqualTo(songId1);
+		assertThat(song.getTitle()).isEqualTo("newTitle");
+		assertThat(song.getSinger()).isEqualTo("newSinger");
+	}
+
+	@Test
+	@DisplayName("선택한 노래의 제목, 가수명 수정 실패 : 존재하지 않는 노래")
+	void 노래제목가수명수정_실패_존재하지않는노래(){
+		// given
+		EditSongRequest request = new EditSongRequest(songId1,"newTitle","newSinger");
+		when(songRepository.findById(songId1)).thenReturn(Optional.empty());
+		// when, then
+		assertThatThrownBy(() -> songService.editSong(user, request))
+			.isInstanceOf(SongPermissionException.class)
+			.hasFieldOrPropertyWithValue("status", HttpStatus.UNAUTHORIZED.value())
+			.hasFieldOrPropertyWithValue("error","플레이리스트에 존재하지 않는 노래입니다.");
+	}
+
+	@Test
+	@DisplayName("선택한 노래의 제목, 가수명 수정 실패 : 주인 불일치")
+	void 노래제목가수명수정_실패_주인불일치(){
+		// given
+		EditSongRequest request = new EditSongRequest(songId1,"newTitle","newSinger");
+		when(songRepository.findById(songId1)).thenReturn(Optional.ofNullable(song1));
+		// when, then
+		assertThatThrownBy(() -> songService.editSong(diffUser, request))
+			.isInstanceOf(SongPermissionException.class)
+			.hasFieldOrPropertyWithValue("status",HttpStatus.FORBIDDEN.value())
+			.hasFieldOrPropertyWithValue("error","노래 주인과 사용자가 일치하지 않습니다.");
 	}
 }
