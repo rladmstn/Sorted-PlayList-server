@@ -1,6 +1,7 @@
 package com.my.sorted_playlist.user.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -36,8 +37,8 @@ public class ImageService {
 		metadata.setContentLength(multipartFile.getSize());
 		metadata.setContentType(multipartFile.getContentType());
 
-		try {
-			amazonS3.putObject(bucket, fileName, multipartFile.getInputStream(), metadata);
+		try(InputStream inputStream = multipartFile.getInputStream()){
+			amazonS3.putObject(bucket, fileName, inputStream, metadata);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
