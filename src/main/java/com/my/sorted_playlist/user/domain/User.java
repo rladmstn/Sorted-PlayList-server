@@ -31,7 +31,7 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
-	private LocalDate deletedDate;
+	private LocalDate deletedDate = null;
 	@Builder
 	public User(String email, String password, String nickname, String profileImage, Role role) {
 		this.email = email;
