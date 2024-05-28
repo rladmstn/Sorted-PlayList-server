@@ -2,6 +2,8 @@ package com.my.sorted_playlist.user.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -156,6 +158,32 @@ class UserServiceTest {
 		assertThat(userInfo.email()).isEqualTo(email);
 		assertThat(userInfo.nickname()).isEqualTo(nickname);
 		assertThat(userInfo.profileImage()).isEqualTo(imageUrl);
+	}
+
+	@Test
+	@DisplayName("회원 탈퇴 성공")
+	void 회원탈퇴_성공(){
+		// given
+		User user = User.builder().email(email).password(password).nickname(nickname).profileImage(imageUrl).role(Role.USER).build();
+		when(passwordEncoder.matches(user.getPassword(),password)).thenReturn(true);
+		// when
+		userService.unregister(user, password);
+		// then
+		verify(imageService,times(1)).deleteImage(user.getProfileImage());
+		assertThat(user.getDeletedDate()).isEqualTo(LocalDate.now());
+	}
+
+	@Test
+	@DisplayName("회원 탈퇴 실패 : 비밀번호 불일치")
+	void 회원탈퇴_실패_비밀번호불일치(){
+		// given
+		User user = User.builder().email(email).password(password).nickname(nickname).profileImage(imageUrl).role(Role.USER).build();
+		when(passwordEncoder.matches("otherPassword",user.getPassword())).thenReturn(false);
+		// when, then
+		assertThatThrownBy(() -> userService.unregister(user,"otherPassword"))
+			.isInstanceOf(UserPermissionException.class)
+			.hasFieldOrPropertyWithValue("status", HttpStatus.UNAUTHORIZED.value())
+			.hasFieldOrPropertyWithValue("error","비밀번호가 틀렸습니다.");
 
 	}
 }

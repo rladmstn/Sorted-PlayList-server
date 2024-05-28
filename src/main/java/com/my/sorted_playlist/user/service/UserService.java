@@ -73,7 +73,7 @@ public class UserService {
 	public void unregister(User user, String password){
 		checkPassword(user, password);
 		imageService.deleteImage(user.getProfileImage());
-		userRepository.delete(user);
+		user.deleteUser();
 		log.info("success to unregister");
 	}
 
@@ -85,7 +85,7 @@ public class UserService {
 	private void checkPassword(User user, String password) {
 		String encodedPassword = user.getPassword();
 		if (! passwordEncoder.matches(password, encodedPassword))
-			throw new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다");
+			throw new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다.");
 	}
 	private User checkEmail(LogInRequest logInRequest) {
 		return userRepository.findByEmail(logInRequest.email())
