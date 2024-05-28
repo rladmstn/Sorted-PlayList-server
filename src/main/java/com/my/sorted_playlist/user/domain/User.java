@@ -1,5 +1,6 @@
 package com.my.sorted_playlist.user.domain;
 
+import java.time.LocalDate;
 import com.my.sorted_playlist.common.enums.Role;
 
 import jakarta.persistence.Column;
@@ -30,6 +31,7 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
+	private LocalDate deletedDate;
 	@Builder
 	public User(String email, String password, String nickname, String profileImage, Role role) {
 		this.email = email;
@@ -44,5 +46,9 @@ public class User {
 	}
 	public void editProfileImage(String profileImage){
 		this.profileImage = profileImage;
+	}
+
+	public void deleteUser(){
+		this.deletedDate = LocalDate.now();
 	}
 }
