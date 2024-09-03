@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.user.domain.User;
+import com.my.sorted_playlist.user.dto.CheckEmailRequest;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.user.dto.LogInRequest;
 import com.my.sorted_playlist.user.dto.UserInfoResponse;
@@ -87,9 +88,13 @@ public class UserService {
 		if (! passwordEncoder.matches(password, encodedPassword))
 			throw new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다.");
 	}
-	private User checkEmail(LogInRequest logInRequest) {
+	public User checkEmail(LogInRequest logInRequest) {
 		return userRepository.findByEmail(logInRequest.email())
 			.orElseThrow(() -> new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "가입되지 않은 이메일 입니다."));
 	}
 
+	public void checkEmailValidation(CheckEmailRequest request) {
+		if(userRepository.existsByEmail(request.email()))
+			throw new UserValidationException("이미 사용 중인 이메일 입니다.");
+	}
 }

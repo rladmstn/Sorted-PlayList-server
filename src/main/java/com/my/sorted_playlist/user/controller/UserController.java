@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.my.sorted_playlist.common.annotation.CurrentUser;
 import com.my.sorted_playlist.common.annotation.SessionInfo;
 import com.my.sorted_playlist.user.domain.User;
+import com.my.sorted_playlist.user.dto.CheckEmailRequest;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.common.exception.RequestException;
 import com.my.sorted_playlist.user.dto.LogInRequest;
@@ -91,9 +92,10 @@ public class UserController {
 		return ResponseEntity.ok().body("OK");
 	}
 
-	@GetMapping("/test")
-	@Operation(summary = "session test API")
-	public ResponseEntity<Object> test(@CurrentUser User user){
-		return ResponseEntity.ok().body(user.getEmail());
+	@PostMapping("/check-email")
+	@Operation(summary = "이메일 중복 확인", description = "회원 가입 시 이메일 중복을 확인하는 API")
+	public ResponseEntity<String> checkEmail(@RequestBody CheckEmailRequest request){
+		userService.checkEmailValidation(request);
+		return ResponseEntity.ok().body("OK");
 	}
 }
