@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.my.sorted_playlist.common.enums.Role;
 import com.my.sorted_playlist.user.domain.User;
-import com.my.sorted_playlist.user.dto.CheckEmailRequest;
 import com.my.sorted_playlist.user.dto.RegisterRequest;
 import com.my.sorted_playlist.user.dto.LogInRequest;
 import com.my.sorted_playlist.user.dto.UserInfoResponse;
@@ -30,7 +29,7 @@ public class UserService {
 	private final ImageService imageService;
 
 	public void register(RegisterRequest registerRequest, MultipartFile profileImage){
-		validateDuplicatedEmail(registerRequest.email());
+		checkEmailValidation(registerRequest.email());
 		String imageUrl = imageService.saveImage(profileImage);
 
 		userRepository.save(registerRequest.toEntity(
@@ -41,11 +40,6 @@ public class UserService {
 			Role.USER
 		));
 		log.info("success to register");
-	}
-
-	public void validateDuplicatedEmail(String email){
-		if(userRepository.existsByEmail(email))
-			throw new UserValidationException("이미 가입된 이메일 입니다.");
 	}
 
 	public UserResponse logIn(LogInRequest logInRequest) {
@@ -93,8 +87,8 @@ public class UserService {
 			.orElseThrow(() -> new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "가입되지 않은 이메일 입니다."));
 	}
 
-	public void checkEmailValidation(CheckEmailRequest request) {
-		if(userRepository.existsByEmail(request.email()))
+	public void checkEmailValidation(String email) {
+		if(userRepository.existsByEmail(email))
 			throw new UserValidationException("이미 사용 중인 이메일 입니다.");
 	}
 }

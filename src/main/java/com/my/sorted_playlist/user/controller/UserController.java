@@ -49,13 +49,6 @@ public class UserController {
 		return ResponseEntity.ok().body("회원가입 성공");
 	}
 
-	@PostMapping("/email-check")
-	@Operation(summary = "이메일 중복 확인", description = "회원가입 시, 이메일 중복 확인 버튼을 누를 때 사용하는 API")
-	public ResponseEntity<Object> validateDuplicatedEmail(@RequestParam String email){
-		userService.validateDuplicatedEmail(email);
-		return ResponseEntity.ok().body("OK");
-	}
-
 	@PostMapping("/login")
 	@Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하는 API")
 	public ResponseEntity<Object> logIn(@Valid @RequestBody LogInRequest logInRequest, Errors errors,
@@ -95,7 +88,7 @@ public class UserController {
 	@PostMapping("/check-email")
 	@Operation(summary = "이메일 중복 확인", description = "회원 가입 시 이메일 중복을 확인하는 API")
 	public ResponseEntity<String> checkEmail(@RequestBody CheckEmailRequest request){
-		userService.checkEmailValidation(request);
+		userService.checkEmailValidation(request.email());
 		return ResponseEntity.ok().body("OK");
 	}
 }
