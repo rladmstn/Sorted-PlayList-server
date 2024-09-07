@@ -2,6 +2,8 @@ package com.my.sorted_playlist.song.domain;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.my.sorted_playlist.playlist.domain.Playlist;
 
 import jakarta.persistence.Entity;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class Song {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

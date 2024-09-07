@@ -1,6 +1,9 @@
 package com.my.sorted_playlist.user.domain;
 
 import java.time.LocalDate;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.my.sorted_playlist.common.enums.Role;
 
 import jakarta.persistence.Column;
@@ -17,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

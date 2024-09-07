@@ -2,6 +2,8 @@ package com.my.sorted_playlist.playlist.domain;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.my.sorted_playlist.playlist.dto.GetPlaylistResponse;
 import com.my.sorted_playlist.user.domain.User;
 
@@ -19,6 +21,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class Playlist {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
