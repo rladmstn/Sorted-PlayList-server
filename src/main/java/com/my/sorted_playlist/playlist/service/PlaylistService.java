@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.dto.EditPlaylistNameRequest;
@@ -14,17 +15,16 @@ import com.my.sorted_playlist.playlist.exception.PlaylistRequestException;
 import com.my.sorted_playlist.playlist.repository.PlaylistRepository;
 import com.my.sorted_playlist.user.domain.User;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PlaylistService {
 	private final PlaylistRepository playlistRepository;
 
+	@Transactional
 	public void createPlayList(User user, String name){
 		if(playlistRepository.existsByUserAndName(user,name))
 			throw new PlaylistRequestException("중복되는 이름의 플레이리스트가 있습니다.");
@@ -37,6 +37,7 @@ public class PlaylistService {
 		log.info("success to create playlist");
 	}
 
+	@Transactional
 	public Playlist editPlayListName(User user, EditPlaylistNameRequest request) {
 		Playlist playlist = checkPermission(request.playlistId(), user);
 
@@ -45,6 +46,7 @@ public class PlaylistService {
 		return playlist;
 	}
 
+	@Transactional(readOnly = true)
 	public List<GetPlaylistResponse> getPlayLists(User user) {
 		List<GetPlaylistResponse> response = playlistRepository.findAllByUser(user)
 			.stream().map(Playlist::toDTO).toList();
@@ -52,6 +54,7 @@ public class PlaylistService {
 		return response;
 	}
 
+	@Transactional
 	public void deletePlaylist(User user, Long playlistId) {
 		checkPermission(playlistId, user);
 		playlistRepository.deleteById(playlistId);
