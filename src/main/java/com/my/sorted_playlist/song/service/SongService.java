@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.my.sorted_playlist.playlist.domain.Playlist;
 import com.my.sorted_playlist.playlist.exception.PlaylistPermissionException;
@@ -17,17 +18,17 @@ import com.my.sorted_playlist.song.exception.SongPermissionException;
 import com.my.sorted_playlist.song.repository.SongRepository;
 import com.my.sorted_playlist.user.domain.User;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class SongService {
 	private final SongRepository songRepository;
 	private final PlaylistRepository playlistRepository;
+
+	@Transactional
 	public void addSongToPlaylist(User user, AddSongRequest addSongRequest) {
 		Playlist playlist = checkPlaylistPermission(addSongRequest.playlistId(), user);
 		songRepository.save(addSongRequest.toEntity(playlist));
@@ -35,6 +36,7 @@ public class SongService {
 		log.info("success to add song to playlist");
 	}
 
+	@Transactional(readOnly = true)
 	public List<GetSongResponse> getSongsInPlaylist(User user, Long playlistId) {
 		Playlist playlist = checkPlaylistPermission(playlistId, user);
 		List<GetSongResponse> result = songRepository.findAllByPlaylist(playlist)
@@ -43,6 +45,7 @@ public class SongService {
 		return result;
 	}
 
+	@Transactional(readOnly = true)
 	public List<GetSongResponse> getSongsOrderBy(User user, Long playlistId, Order order) {
 		Playlist playlist = checkPlaylistPermission(playlistId, user);
 		List<Song> songs = getOrderedSongs(order, playlist);
@@ -60,6 +63,7 @@ public class SongService {
 		};
 	}
 
+	@Transactional
 	public void deleteSongFromPlaylist(User user, Long songId) {
 		Song song = checkSongPermission(user, songId);
 		Playlist playlist = song.getPlaylist();
@@ -68,6 +72,7 @@ public class SongService {
 		log.info("success to delete song from the playlist");
 	}
 
+	@Transactional
 	public Song editSong(User user, EditSongRequest request) {
 		Song song = checkSongPermission(user, request.songId());
 		if (request.title() != null && !request.title().isBlank())
@@ -78,6 +83,7 @@ public class SongService {
 		return song;
 	}
 
+	@Transactional
 	public void updateSongPlayInfo(User user, Long songId) {
 		Song song = checkSongPermission(user, songId);
 		song.updatePlayInfo();
