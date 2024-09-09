@@ -3,6 +3,7 @@ package com.my.sorted_playlist.user.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.my.sorted_playlist.common.enums.Role;
@@ -15,19 +16,18 @@ import com.my.sorted_playlist.user.exception.UserPermissionException;
 import com.my.sorted_playlist.user.exception.UserValidationException;
 import com.my.sorted_playlist.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final ImageService imageService;
 
+	@Transactional
 	public void register(RegisterRequest registerRequest, MultipartFile profileImage){
 		checkEmailValidation(registerRequest.email());
 		String imageUrl = imageService.saveImage(profileImage);
@@ -42,12 +42,14 @@ public class UserService {
 		log.info("success to register");
 	}
 
+	@Transactional(readOnly = true)
 	public UserResponse logIn(LogInRequest logInRequest) {
 		User user = checkEmailAndPassword(logInRequest);
 		log.info("success to login");
 		return new UserResponse(user.getId(),user.getEmail(),user.getNickname(),user.getProfileImage()); // 비밀번호를 제거한 user 객체 반환
 	}
 
+	@Transactional
 	public User editUserInfo(User currUser, String nickname, MultipartFile profileImage){
 		User user = userRepository.findByIdAndEmail(currUser.getId(), currUser.getEmail());
 		if(nickname != null && !nickname.isBlank())
@@ -61,10 +63,12 @@ public class UserService {
 		return user;
 	}
 
+	@Transactional(readOnly = true)
 	public UserInfoResponse getUserInfo(User user){
 		return new UserInfoResponse(user.getEmail(), user.getNickname(), user.getProfileImage());
 	}
 
+	@Transactional
 	public void unregister(User user, String password){
 		checkPassword(user, password);
 		imageService.deleteImage(user.getProfileImage());
@@ -82,11 +86,14 @@ public class UserService {
 		if (! passwordEncoder.matches(password, encodedPassword))
 			throw new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "비밀번호가 틀렸습니다.");
 	}
+
+	@Transactional(readOnly = true)
 	public User checkEmail(LogInRequest logInRequest) {
 		return userRepository.findByEmail(logInRequest.email())
 			.orElseThrow(() -> new UserPermissionException(HttpStatus.UNAUTHORIZED.value(), "가입되지 않은 이메일 입니다."));
 	}
 
+	@Transactional(readOnly = true)
 	public void checkEmailValidation(String email) {
 		if(userRepository.existsByEmail(email))
 			throw new UserValidationException("이미 사용 중인 이메일 입니다.");
