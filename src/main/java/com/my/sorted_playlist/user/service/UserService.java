@@ -51,16 +51,16 @@ public class UserService {
 
 	@Transactional
 	public User editUserInfo(User currUser, String nickname, MultipartFile profileImage){
-		User user = userRepository.findByIdAndEmail(currUser.getId(), currUser.getEmail());
 		if(nickname != null && !nickname.isBlank())
-			user.editNickname(nickname);
+			currUser.editNickname(nickname);
 		if(profileImage != null && !profileImage.isEmpty()){
 			String imageUrl = imageService.saveImage(profileImage);
-			imageService.deleteImage(user.getProfileImage());
-			user.editProfileImage(imageUrl);
+			imageService.deleteImage(currUser.getProfileImage());
+			currUser.editProfileImage(imageUrl);
 		}
+		userRepository.save(currUser);
 		log.info("success to edit user information");
-		return user;
+		return currUser;
 	}
 
 	@Transactional(readOnly = true)
