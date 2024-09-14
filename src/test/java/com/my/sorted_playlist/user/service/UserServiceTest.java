@@ -143,6 +143,7 @@ class UserServiceTest {
 		// then
 		verify(imageService,times(1)).saveImage(newImage);
 		verify(imageService,times(1)).deleteImage(imageUrl);
+		verify(userRepository,times(1)).save(any(User.class));
 		assertThat(edited.getProfileImage()).isEqualTo(newImageUrl);
 		assertThat(edited.getNickname()).isEqualTo(newNickname);
 	}
