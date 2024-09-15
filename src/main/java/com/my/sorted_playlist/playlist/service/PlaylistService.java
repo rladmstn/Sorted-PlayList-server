@@ -69,4 +69,15 @@ public class PlaylistService {
 			throw new PlaylistPermissionException(HttpStatus.FORBIDDEN.value(), "플레이리스트의 주인과 사용자가 일치하지 않습니다.");
 		return playlist;
 	}
+
+	@Transactional(readOnly = true)
+	public GetPlaylistResponse getPlaylist(User user, Long playlistId) {
+		Playlist playlist = playlistRepository.findById(playlistId)
+			.orElseThrow(() -> new PlaylistRequestException("존재하지 않는 플레이리스트입니다."));
+
+		if(!playlist.getUser().getId().equals(user.getId()))
+			throw new PlaylistPermissionException(HttpStatus.FORBIDDEN.value(), "플레이리스트의 주인과 사용자가 일치하지 않습니다.");
+
+		return Playlist.toDTO(playlist);
+	}
 }

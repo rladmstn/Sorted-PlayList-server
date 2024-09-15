@@ -7,6 +7,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,5 +62,12 @@ public class PlaylistController {
 	public ResponseEntity<Object> deletePlayList(@CurrentUser User user, @NotNull Long playlistId){
 		playListService.deletePlaylist(user,playlistId);
 		return ResponseEntity.ok().body("OK");
+	}
+
+	@GetMapping("/{playlistId}")
+	@Operation(summary = "회원 플레이리스트 하나 조회")
+	public ResponseEntity<GetPlaylistResponse> getPlaylistById(@CurrentUser User user, @PathVariable Long playlistId){
+		GetPlaylistResponse response = playListService.getPlaylist(user, playlistId);
+		return ResponseEntity.ok().body(response);
 	}
 }
