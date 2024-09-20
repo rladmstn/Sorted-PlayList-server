@@ -1,6 +1,8 @@
 package com.my.sorted_playlist.user.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,7 @@ import com.my.sorted_playlist.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +92,14 @@ public class UserController {
 	@Operation(summary = "이메일 중복 확인", description = "회원 가입 시 이메일 중복을 확인하는 API")
 	public ResponseEntity<String> checkEmail(@RequestBody CheckEmailRequest request){
 		userService.checkEmailValidation(request.email());
+		return ResponseEntity.ok().body("OK");
+	}
+
+	@PostMapping("/logout")
+	@Operation(summary = "로그아웃", description = "세션을 로그아웃하는 API")
+	public ResponseEntity<String> logout(Authentication authentication, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse){
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.logout(httpServletRequest,httpServletResponse,authentication);
 		return ResponseEntity.ok().body("OK");
 	}
 }
